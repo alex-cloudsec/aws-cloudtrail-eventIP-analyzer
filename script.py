@@ -21,7 +21,7 @@ def get_ip_info(ip):
         return country, city
     return "Unknown", "Unknown"
 
-def get_event_ips(event_name, email, days, region):
+def get_event_ips(event_name, emails, days, region):
     # Create a CloudTrail client
     client = boto3.client('cloudtrail', region_name=region)
 
@@ -29,12 +29,10 @@ def get_event_ips(event_name, email, days, region):
     end_time = datetime.now(pytz.utc)
     start_time = end_time - timedelta(days=days)
 
-    print(f"Analyzing '{event_name}' events for {email} from {start_time} to {end_time} in {region}...")
-
     # Create a paginator
     paginator = client.get_paginator('lookup_events')
 
-    ip_addresses = set()
+    user_ip_map = {}
 
     # Retrieve and process events
     page_iterator = paginator.paginate(
@@ -55,11 +53,13 @@ def get_event_ips(event_name, email, days, region):
             event_username = extract_username(user_identity)
             ip_address = event_data.get('sourceIPAddress')
 
-            # Check if the email matches
-            if event_username and (event_username == email or event_username.endswith(f"@{email}")) and ip_address:
-                ip_addresses.add(ip_address)
+            # Check if the email matches or if 'all' is specified
+            if 'all' in emails or (event_username and any(event_username == email or event_username.endswith(f"@{email}") for email in emails)) and ip_address:
+                if event_username not in user_ip_map:
+                    user_ip_map[event_username] = set()
+                user_ip_map[event_username].add(ip_address)
 
-    return ip_addresses
+    return user_ip_map
 
 def extract_username(user_identity):
     """ Extracts the username from the userIdentity data. """
@@ -73,17 +73,21 @@ def extract_username(user_identity):
 
 # User input
 event_name = input("Enter Event Name for filtering (e.g., ConsoleLogin): ")
-emails = input("Enter IAM username for analysis (comma-separated): ").split(',')
+emails_input = input("Enter Usernames for analysis (comma-separated) or 'all' for all users: ")
+emails = emails_input.split(',') if emails_input != 'all' else ['all']
 days = int(input("Enter the number of days for analysis: "))
 aws_region = input("Enter the AWS region for search: ")
 
-# Process each email
-for email in emails:
-    email = email.strip()  # Remove any whitespace around the email
-    ip_addresses = get_event_ips(event_name, email, days, aws_region)
+# Process each email or all users
+user_ip_map = get_event_ips(event_name, emails, days, aws_region)
 
-    # Output the results
-    print(f"IP addresses, countries and cities for '{email}' associated with '{event_name}':")
+# Output the results
+if 'all' in emails:
+    print(f"IP addresses, countries, and cities for all users associated with '{event_name}':")
+else:
+    print(f"IP addresses, countries, and cities for specified emails associated with '{event_name}':")
+
+for user, ip_addresses in user_ip_map.items():
     for ip_address in ip_addresses:
         country, city = get_ip_info(ip_address)
-        print(f"{ip_address} (Country: {country}, City: {city})")
+        print(f"User: {user}, IP: {ip_address}, Country: {country}, City: {city}")
