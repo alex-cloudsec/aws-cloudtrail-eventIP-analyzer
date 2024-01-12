@@ -25,7 +25,7 @@ This Python script analyzes AWS CloudTrail logs to extract IP addresses associat
    - AWS region for searching the logs.
 3. **View Results**: The script outputs the IP addresses, along with their corresponding countries and cities, associated with the specified email addresses and event name.
 
-<img width="1280" alt="image" src="https://github.com/dvinskikh/aws-console-logins-analyzer/assets/102820548/4c010847-62ec-4b37-92ed-51be59f4b0fd">
+![image](https://github.com/dvinskikh/aws-cloudtrail-eventIP-analyzer/assets/102820548/9e56348c-23b4-4aa5-894c-00c6217b61c4)
 
 ## Installation
 Clone the repository to your local machine: 'git clone <repository-url>'
