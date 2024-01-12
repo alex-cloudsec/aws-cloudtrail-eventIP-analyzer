@@ -28,7 +28,7 @@ This Python script analyzes AWS CloudTrail logs to extract IP addresses associat
 ![image](https://github.com/dvinskikh/aws-cloudtrail-eventIP-analyzer/assets/102820548/9e56348c-23b4-4aa5-894c-00c6217b61c4)
 
 ## Installation
-Clone the repository to your local machine: 'git clone [<repository-url>](https://github.com/dvinskikh/aws-cloudtrail-eventIP-analyzer.git)'
+Clone the repository to your local machine: `git clone [<repository-url>](https://github.com/dvinskikh/aws-cloudtrail-eventIP-analyzer.git)`
 
 ## Dependencies
-Install the required Python libraries: 'pip install boto3 requests'
+Install the required Python libraries: `pip install boto3 requests`
